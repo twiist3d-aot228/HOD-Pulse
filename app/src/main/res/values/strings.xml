@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">HOD Pulse</string>
+    <string name="widget_title">HOD Pulse</string>
+    <string name="server_name_default">HOD DayZ Heaven S16 | PVE ONLY</string>
+    <string name="server_offline">SERVER RESTARTING OR OFFLINE</string>
+    <string name="restart_in">RESTART IN</string>
+    <string name="players_label">PLAYERS</string>
+    <string name="map_label">MAP</string>
+    <string name="time_label">IN-GAME TIME</string>
+    <string name="last_updated">LAST UPDATED</string>
+    <string name="refresh_action">REFRESH</string>
+    <string name="open_app_action">OPEN APP</string>
+</resources>

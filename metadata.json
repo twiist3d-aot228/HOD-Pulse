@@ -1,0 +1,6 @@
+{
+  "name": "HOD Pulse",
+  "description": "Live status monitor and home screen widget for HOD DayZ Heaven S16 server with player counts, map, in-game time, and restart countdown.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
