@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HOD Pulse — HOD DayZ Heaven S16</title>
+<meta name="description" content="Live server status for HOD DayZ Heaven S16 (DayZ, ChernarusPlus): players online, in-game time, restart countdown. By TWiiST3D.">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HOD Pulse">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{
+    --bg:#000000; --panel:#031007; --panel2:#04170b; --border:#0d3319; --border2:#14532a;
+    --text:#d9ffd9; --dim:#7fae84; --faint:#4c7254;
+    --green:#00ff41; --green-dim:#00a82e; --red:#ff2e2e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;
+    background-image:radial-gradient(ellipse 90% 45% at 50% -5%, rgba(0,255,65,.13), transparent 65%);
+    min-height:100vh; padding:20px 14px 40px;
+  }
+  .wrap{max-width:520px;margin:0 auto}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  header{text-align:center;margin:8px 0 4px}
+  .wordmark{
+    font-size:44px;font-weight:900;letter-spacing:3px;line-height:1;margin:0;
+    color:var(--green); text-shadow:0 0 18px rgba(0,255,65,.55), 0 0 46px rgba(0,255,65,.25);
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  .wordmark span{color:var(--text); text-shadow:0 0 14px rgba(0,255,65,.35)}
+  .sub{color:var(--dim);letter-spacing:2.5px;font-size:13px;text-transform:uppercase;margin-top:8px}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;margin:18px auto 0;padding:7px 16px;
+    border:1px solid var(--border2);border-radius:999px;background:var(--panel);
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;letter-spacing:2px;color:var(--green);
+  }
+  .badge .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.6s infinite}
+  .badge.off{color:var(--red);border-color:#5a1414}
+  .badge.off .dot{background:var(--red);box-shadow:0 0 10px var(--red);animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .center{text-align:center}
+  .players{margin:22px 0 4px}
+  .players .big{
+    font-size:64px;font-weight:900;line-height:1;color:var(--green);
+    text-shadow:0 0 22px rgba(0,255,65,.45);font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+  .players .lbl{color:var(--dim);letter-spacing:2px;font-size:12px;text-transform:uppercase;margin-top:6px}
+  .bar{height:10px;border:1px solid var(--border2);border-radius:6px;background:#02140a;margin:12px 4px 0;overflow:hidden}
+  .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--green-dim),var(--green));box-shadow:0 0 12px rgba(0,255,65,.6);transition:width .8s ease}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:12px;padding:14px 12px;text-align:center}
+  .card .k{color:var(--faint);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .card .v{color:var(--text);font-size:26px;font-weight:700;margin-top:6px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .card .v.green{color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.4)}
+  .card .s{color:var(--dim);font-size:12px;margin-top:3px;letter-spacing:1px}
+  .join{margin-top:18px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border2);border-radius:12px;padding:16px 12px;text-align:center}
+  .join .k{color:var(--faint);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .join .addr{color:var(--green);font-size:26px;font-weight:700;margin:8px 0 12px;text-shadow:0 0 12px rgba(0,255,65,.4);word-break:break-all}
+  button{
+    background:var(--green-dim);color:#fff;border:none;border-radius:9px;
+    font-size:16px;font-weight:700;letter-spacing:1px;padding:12px 26px;cursor:pointer;width:100%;
+  }
+  button:active{filter:brightness(1.25)}
+  .btn-ghost{background:transparent;color:var(--green);border:1px solid var(--border2);margin-top:10px}
+  .steps{margin-top:18px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .steps h2{margin:0 0 10px;font-size:15px;letter-spacing:2px;color:var(--green);text-transform:uppercase;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .steps ol{margin:0;padding-left:20px;color:var(--text);font-size:15px;line-height:1.75}
+  .steps p{color:var(--dim);font-size:13px;line-height:1.6;margin:10px 0 0}
+  footer{margin-top:22px;text-align:center;color:var(--faint);font-size:12px;line-height:1.9}
+  footer a{color:var(--dim)}
+  #stale{display:none;color:#ffb02e;font-size:12px;text-align:center;margin-top:8px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="wordmark">HOD <span>PULSE</span></h1>
+    <div class="sub">HOD DayZ Heaven S16 &middot; PVE &middot; ChernarusPlus</div>
+    <div class="center"><div class="badge" id="badge"><span class="dot"></span><span id="badgeText">CHECKING&hellip;</span></div></div>
+  </header>
+
+  <div class="players center">
+    <div class="big"><span id="pNow">&ndash;</span><span style="color:var(--dim);font-size:38px"> / </span><span id="pMax" style="color:var(--dim);font-size:38px">60</span></div>
+    <div class="lbl">Players online</div>
+    <div class="bar"><i id="pBar"></i></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="k">In-game time</div><div class="v green" id="clock">&ndash;:&ndash;</div><div class="s" id="phase">Day / Night</div></div>
+    <div class="card"><div class="k">Next restart</div><div class="v green mono" id="countdown">&ndash;:&ndash;:&ndash;</div><div class="s" id="restartAt">every 3 hours</div></div>
+    <div class="card"><div class="k">World rank</div><div class="v" id="rank">&ndash;</div><div class="s">dayzmetrics</div></div>
+    <div class="card"><div class="k">DayZ version</div><div class="v" id="version" style="font-size:19px;padding-top:5px">&ndash;</div><div class="s"><span id="mods">&ndash;</span> mods</div></div>
+  </div>
+
+  <div class="join">
+    <div class="k">Tap to copy &middot; join address</div>
+    <div class="addr mono" id="addr">198.73.57.157:2303</div>
+    <button id="copyBtn" type="button">COPY IP</button>
+    <button class="btn-ghost" id="refreshBtn" type="button">&#8635; REFRESH STATUS</button>
+    <div id="stale">Live status unreachable right now &mdash; showing the last good numbers. Tap Refresh.</div>
+  </div>
+
+  <div class="steps">
+    <h2>Put it on your iPhone</h2>
+    <ol>
+      <li>Open this page in <b>Safari</b></li>
+      <li>Tap the <b>Share</b> button</li>
+      <li>Tap <b>Add to Home Screen</b></li>
+      <li>Tap <b>Add</b> &mdash; HOD Pulse now sits on your home screen like an app</li>
+    </ol>
+    <p>On Android it works the same way from Chrome&rsquo;s menu: &ldquo;Add to Home screen&rdquo;.</p>
+  </div>
+
+  <footer>
+    <div>Live status via <a href="https://dayzmetrics.com/server/160033/hod-dayz-heaven-s16-pve-only-ai-city-helis-quests-airdrops-f" target="_blank" rel="noopener">dayzmetrics</a> &middot; updated <span id="updated">&mdash;</span> &middot; auto-refresh 60s</div>
+    <div>Built by TWiiST3D &middot; companion to the HOD Pulse Android app</div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+var API = "https://dayzmetrics.com/api/server/160033";
+var state = { data:null, fetchedAt:0, nextRestart:null, gameBase:null, gameBaseAt:0, accel:8 };
+
+function $(id){ return document.getElementById(id); }
+
+function extractJSON(text){
+  if(!text) return null;
+  try { return JSON.parse(text); } catch(e){}
+  var i = text.indexOf("{"), j = text.lastIndexOf("}");
+  if(i >= 0 && j > i){ try { return JSON.parse(text.slice(i, j+1)); } catch(e){} }
+  return null;
+}
+
+function fetchText(url, ms){
+  var ctl = ("AbortController" in window) ? new AbortController() : null;
+  var t = ctl ? setTimeout(function(){ ctl.abort(); }, ms||14000) : null;
+  return fetch(url, ctl ? {signal: ctl.signal} : {}).then(function(r){
+    if(t) clearTimeout(t);
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return r.text();
+  });
+}
+
+function trySource(i){
+  var enc = encodeURIComponent(API);
+  var routes = [
+    function(){ return fetchText("https://r.jina.ai/" + API).then(extractJSON); },
+    function(){ return fetchText("https://api.codetabs.com/v1/proxy?quest=" + API).then(extractJSON); },
+    function(){ return fetchText("https://api.allorigins.win/raw?url=" + enc).then(extractJSON); },
+    function(){ return fetchText("https://api.allorigins.win/get?url=" + enc).then(function(t){
+      var o = extractJSON(t); if(o && o.contents){ return extractJSON(o.contents); } return o; }); }
+  ];
+  if(i >= routes.length) return Promise.reject(new Error("all sources failed"));
+  return routes[i]().then(function(d){
+    if(!d || !d.current || typeof d.current.players !== "number") throw new Error("bad payload");
+    return d;
+  }).catch(function(){ return trySource(i+1); });
+}
+
+function fmtClock(mins){
+  mins = ((mins % 1440) + 1440) % 1440;
+  var h = Math.floor(mins/60), m = Math.floor(mins % 60);
+  return (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
+}
+
+function render(d){
+  state.data = d; state.fetchedAt = Date.now();
+  var cur = d.current || {};
+  var online = (cur.status || "online") === "online";
+  $("badgeText").textContent = online ? "ONLINE" : "OFFLINE";
+  $("badge").className = "badge" + (online ? "" : " off");
+  var p = cur.players || 0, mx = cur.max_players || d.max_players || 60;
+  $("pNow").textContent = p; $("pMax").textContent = mx;
+  $("pBar").style.width = Math.min(100, mx ? (p/mx*100) : 0) + "%";
+  $("rank").textContent = d.rank_pos ? ("#" + d.rank_pos) : "–";
+  $("version").textContent = d.version || "–";
+  $("mods").textContent = (d.mod_count != null ? d.mod_count : "–");
+  // in-game clock baseline (game_time "HH:MM" + game_time_at stamp, x8 accel)
+  var gt = (d.game_time || "00:00").split(":");
+  state.gameBase = (parseInt(gt[0],10)||0)*60 + (parseInt(gt[1],10)||0);
+  state.gameBaseAt = d.game_time_at ? Date.parse(d.game_time_at) : Date.now();
+  if(isNaN(state.gameBaseAt)) state.gameBaseAt = Date.now();
+  state.accel = d.time_accel || 8;
+  // restart: tracker-provided next restart wins; else next 3h UTC boundary (+1m offset seen on this server)
+  var nr = d.restart && d.restart.next_restart ? Date.parse(d.restart.next_restart) : NaN;
+  state.nextRestart = !isNaN(nr) ? nr : null;
+  $("updated").textContent = new Date().toLocaleTimeString();
+  $("stale").style.display = "none";
+  tick();
+}
+
+function nextBoundary(){
+  var now = new Date();
+  var base = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
+  var t = base + 60*1000; // this server's restarts land ~1 min past the 3h mark
+  while(t <= Date.now()) t += 3*3600*1000;
+  return t;
+}
+
+function tick(){
+  // countdown
+  var target = state.nextRestart;
+  if(!target || target <= Date.now()) target = nextBoundary();
+  var s = Math.max(0, Math.floor((target - Date.now())/1000));
+  var hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60), ss = s%60;
+  $("countdown").textContent = (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
+  $("restartAt").textContent = "at " + new Date(target).toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+  // in-game clock advanced at the server's time acceleration
+  if(state.gameBase != null){
+    var elapsedGameMin = (Date.now() - state.gameBaseAt)/60000 * state.accel;
+    var mins = state.gameBase + elapsedGameMin;
+    $("clock").textContent = fmtClock(mins);
+    var h = Math.floor((((mins % 1440)+1440)%1440)/60);
+    $("phase").textContent = (h >= 6 && h < 19) ? "Day" : "Night";
+  }
+}
+
+function refresh(){
+  return trySource(0).then(render).catch(function(){
+    $("stale").style.display = "block";
+    if(!state.data){ $("badgeText").textContent = "STATUS UNKNOWN"; }
+  });
+}
+
+$("copyBtn").addEventListener("click", function(){
+  var addr = $("addr").textContent.trim();
+  var btn = $("copyBtn");
+  function done(){ btn.textContent = "COPIED \u2713"; setTimeout(function(){ btn.textContent = "COPY IP"; }, 1800); }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(addr).then(done).catch(function(){ fallback(); }); }
+  else fallback();
+  function fallback(){
+    var ta = document.createElement("textarea"); ta.value = addr; document.body.appendChild(ta);
+    ta.select(); try { document.execCommand("copy"); done(); } catch(e){} document.body.removeChild(ta);
+  }
+});
+$("addr").addEventListener("click", function(){ $("copyBtn").click(); });
+$("refreshBtn").addEventListener("click", function(){ refresh(); });
+
+setInterval(tick, 1000);
+setInterval(refresh, 60000);
+refresh();
+</script>
+</body>
+</html>
