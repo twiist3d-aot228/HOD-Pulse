@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>HOD Pulse — HOD DayZ Heaven S16</title>
-<meta name="description" content="Live server status for HOD DayZ Heaven S16 (DayZ, ChernarusPlus): players online, in-game time, restart countdown. By TWiiST3D.">
+<title>HOD Pulse — HOD DayZ server status</title>
+<meta name="description" content="Live server status for HOD DayZ servers (DayZ, ChernarusPlus): players online, in-game time, restart countdown. Pick your server: Heaven C1 or Heaven 2 (C2). By TWiiST3D.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -46,6 +46,14 @@
   .badge.off{color:var(--red);border-color:#5a1414}
   .badge.off .dot{background:var(--red);box-shadow:0 0 10px var(--red);animation:none}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .switch{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .switch .k{width:100%;color:var(--faint);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .switch button{
+    width:auto;padding:9px 18px;font-size:13px;letter-spacing:1.5px;border-radius:999px;
+    background:transparent;color:var(--dim);border:1px solid var(--border2);
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;cursor:pointer;
+  }
+  .switch button.on{background:var(--green-dim);color:#fff;border-color:var(--green-dim);box-shadow:0 0 12px rgba(0,255,65,.35)}
   .center{text-align:center}
   .players{margin:22px 0 4px}
   .players .big{
@@ -83,8 +91,9 @@
 <div class="wrap">
   <header>
     <h1 class="wordmark">HOD <span>PULSE</span></h1>
-    <div class="sub">HOD DayZ Heaven S16 &middot; PVE &middot; ChernarusPlus</div>
+    <div class="sub" id="sub">HOD DayZ Heaven S16 &middot; PVE &middot; ChernarusPlus</div>
     <div class="center"><div class="badge" id="badge"><span class="dot"></span><span id="badgeText">CHECKING&hellip;</span></div></div>
+    <div class="switch center" id="switch"><div class="k">Server</div></div>
   </header>
 
   <div class="players center">
@@ -102,7 +111,7 @@
 
   <div class="join">
     <div class="k">Tap to copy &middot; join address</div>
-    <div class="addr mono" id="addr">198.73.57.157:2303</div>
+    <div class="addr mono" id="addr">198.73.57.157:2302</div>
     <button id="copyBtn" type="button">COPY IP</button>
     <button class="btn-ghost" id="refreshBtn" type="button">&#8635; REFRESH STATUS</button>
     <div id="stale">Live status unreachable right now &mdash; showing the last good numbers. Tap Refresh.</div>
@@ -120,17 +129,83 @@
   </div>
 
   <footer>
-    <div>Live status via <a href="https://dayzmetrics.com/server/160033/hod-dayz-heaven-s16-pve-only-ai-city-helis-quests-airdrops-f" target="_blank" rel="noopener">dayzmetrics</a> &middot; updated <span id="updated">&mdash;</span> &middot; auto-refresh 60s</div>
+    <div>Live status via <a id="dmLink" href="https://dayzmetrics.com/server/160033/hod-dayz-heaven-s16-pve-only-ai-city-helis-quests-airdrops-f" target="_blank" rel="noopener">dayzmetrics</a> &middot; updated <span id="updated">&mdash;</span> &middot; auto-refresh 60s</div>
     <div>Built by TWiiST3D &middot; companion to the HOD Pulse Android app</div>
   </footer>
 </div>
 
 <script>
 "use strict";
-var API = "https://dayzmetrics.com/api/server/160033";
+var SERVERS = [
+  { key:"c1", pill:"C1 \u00B7 CHERNARUS", title:"HOD DayZ Heaven S16",
+    sub:"HOD DayZ Heaven S16 \u00B7 PVE \u00B7 ChernarusPlus",
+    id:"160033", addr:"198.73.57.157:2302", restartH:3,
+    page:"https://dayzmetrics.com/server/160033/hod-dayz-heaven-s16-pve-only-ai-city-helis-quests-airdrops-f" },
+  { key:"c2", pill:"C2 \u00B7 HEAVEN 2", title:"HOD DayZ Heaven 2 S7",
+    sub:"HOD DayZ Heaven 2 S7 \u00B7 PVE \u00B7 ChernarusPlus",
+    id:"160090", addr:"198.73.57.157:2342", restartH:3,
+    page:"https://dayzmetrics.com/server/160090/hod-dayz-heaven-2-s7-pve-only-ai-city-helis-quests-airdrops-" }
+];
+var cur = SERVERS[0];
+var API = "https://dayzmetrics.com/api/server/" + cur.id;
 var state = { data:null, fetchedAt:0, nextRestart:null, gameBase:null, gameBaseAt:0, accel:8 };
 
 function $(id){ return document.getElementById(id); }
+
+function serverByKey(key){
+  for(var i=0;i<SERVERS.length;i++){ if(SERVERS[i].key === key) return SERVERS[i]; }
+  return null;
+}
+
+function buildSwitch(){
+  var box = $("switch");
+  SERVERS.forEach(function(s){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = s.pill; b.setAttribute("data-key", s.key);
+    if(s.key === cur.key) b.className = "on";
+    b.addEventListener("click", function(){ pickServer(s.key, true); });
+    box.appendChild(b);
+  });
+}
+
+function pickServer(key, userAction){
+  var s = serverByKey(key);
+  if(!s) return;
+  var changed = (s.key !== cur.key);
+  cur = s;
+  API = "https://dayzmetrics.com/api/server/" + cur.id;
+  var btns = $("switch").getElementsByTagName("button");
+  for(var i=0;i<btns.length;i++){ btns[i].className = (btns[i].getAttribute("data-key") === cur.key) ? "on" : ""; }
+  $("sub").innerHTML = cur.sub;
+  $("addr").textContent = cur.addr;
+  $("dmLink").href = cur.page;
+  document.title = "HOD Pulse \u2014 " + cur.title;
+  try { localStorage.setItem("hodpulse-server", cur.key); } catch(e){}
+  if(userAction){
+    try {
+      var url = new URL(window.location.href);
+      url.searchParams.set("server", cur.key);
+      history.replaceState(null, "", url.toString());
+    } catch(e){}
+  }
+  if(changed || userAction){
+    state = { data:null, fetchedAt:0, nextRestart:null, gameBase:null, gameBaseAt:0, accel:8 };
+    $("badgeText").textContent = "CHECKING\u2026";
+    $("badge").className = "badge";
+    $("pNow").innerHTML = "&ndash;"; $("pBar").style.width = "0%";
+    $("rank").innerHTML = "&ndash;"; $("version").innerHTML = "&ndash;"; $("mods").innerHTML = "&ndash;";
+    $("clock").innerHTML = "&ndash;:&ndash;"; $("countdown").innerHTML = "&ndash;:&ndash;:&ndash;";
+    $("stale").style.display = "none";
+    refresh();
+  }
+}
+
+function initialServer(){
+  var key = null;
+  try { key = new URL(window.location.href).searchParams.get("server"); } catch(e){}
+  if(!key){ try { key = localStorage.getItem("hodpulse-server"); } catch(e){} }
+  return serverByKey(key) || SERVERS[0];
+}
 
 function extractJSON(text){
   if(!text) return null;
@@ -174,23 +249,23 @@ function fmtClock(mins){
 
 function render(d){
   state.data = d; state.fetchedAt = Date.now();
-  var cur = d.current || {};
-  var online = (cur.status || "online") === "online";
+  var cur2 = d.current || {};
+  var online = (cur2.status || "online") === "online";
   $("badgeText").textContent = online ? "ONLINE" : "OFFLINE";
   $("badge").className = "badge" + (online ? "" : " off");
-  var p = cur.players || 0, mx = cur.max_players || d.max_players || 60;
+  var p = cur2.players || 0, mx = cur2.max_players || d.max_players || 60;
   $("pNow").textContent = p; $("pMax").textContent = mx;
   $("pBar").style.width = Math.min(100, mx ? (p/mx*100) : 0) + "%";
-  $("rank").textContent = d.rank_pos ? ("#" + d.rank_pos) : "–";
-  $("version").textContent = d.version || "–";
-  $("mods").textContent = (d.mod_count != null ? d.mod_count : "–");
+  $("rank").textContent = d.rank_pos ? ("#" + d.rank_pos) : "\u2013";
+  $("version").textContent = d.version || "\u2013";
+  $("mods").textContent = (d.mod_count != null ? d.mod_count : "\u2013");
   // in-game clock baseline (game_time "HH:MM" + game_time_at stamp, x8 accel)
   var gt = (d.game_time || "00:00").split(":");
   state.gameBase = (parseInt(gt[0],10)||0)*60 + (parseInt(gt[1],10)||0);
   state.gameBaseAt = d.game_time_at ? Date.parse(d.game_time_at) : Date.now();
   if(isNaN(state.gameBaseAt)) state.gameBaseAt = Date.now();
   state.accel = d.time_accel || 8;
-  // restart: tracker-provided next restart wins; else next 3h UTC boundary (+1m offset seen on this server)
+  // restart: tracker-provided next restart wins; else next restartH UTC boundary (+1m offset seen on these servers)
   var nr = d.restart && d.restart.next_restart ? Date.parse(d.restart.next_restart) : NaN;
   state.nextRestart = !isNaN(nr) ? nr : null;
   $("updated").textContent = new Date().toLocaleTimeString();
@@ -201,8 +276,8 @@ function render(d){
 function nextBoundary(){
   var now = new Date();
   var base = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
-  var t = base + 60*1000; // this server's restarts land ~1 min past the 3h mark
-  while(t <= Date.now()) t += 3*3600*1000;
+  var t = base + 60*1000; // these servers' restarts land ~1 min past the 3h mark
+  while(t <= Date.now()) t += cur.restartH*3600*1000;
   return t;
 }
 
@@ -244,6 +319,11 @@ $("copyBtn").addEventListener("click", function(){
 });
 $("addr").addEventListener("click", function(){ $("copyBtn").click(); });
 $("refreshBtn").addEventListener("click", function(){ refresh(); });
+
+cur = initialServer();
+API = "https://dayzmetrics.com/api/server/" + cur.id;
+buildSwitch();
+pickServer(cur.key, false);
 
 setInterval(tick, 1000);
 setInterval(refresh, 60000);
