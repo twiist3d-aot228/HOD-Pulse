@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HOD Pulse — HOD DayZ server status</title>
-<meta name="description" content="Live server status for the HOD DayZ servers: players online, in-game time, restart countdown. Pick your server: Chernarus C1 &amp; C2, Pripyat, Lux, Livonia, Namalsk, Deadfall. By TWiiST3D.">
+<meta name="description" content="Live server status for HOD DayZ servers (DayZ, ChernarusPlus): players online, in-game time, restart countdown. Pick your server: Heaven C1 or Heaven 2 (C2). By TWiiST3D.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -144,31 +144,7 @@ var SERVERS = [
   { key:"c2", pill:"C2 \u00B7 HEAVEN 2", title:"HOD DayZ Heaven 2 S7",
     sub:"HOD DayZ Heaven 2 S7 \u00B7 PVE \u00B7 ChernarusPlus",
     id:"160090", addr:"198.73.57.157:2342", restartH:3,
-    page:"https://dayzmetrics.com/server/160090/hod-dayz-heaven-2-s7-pve-only-ai-city-helis-quests-airdrops-" },
-  { key:"pripyat", pill:"PRIPYAT", title:"HOD DayZ Heaven Pripyat S8",
-    sub:"HOD DayZ Heaven Pripyat S8 \u00B7 PVE \u00B7 Pripyat",
-    id:"160593", addr:"198.73.57.157:2322", restartH:3,
-    page:"https://dayzmetrics.com/server/160593" },
-  { key:"lux", pill:"LUX", title:"HOD DayZ Heaven Lux S10",
-    sub:"HOD DayZ Heaven Lux S10 \u00B7 PVE \u00B7 Lux",
-    id:"160473", addr:"198.73.57.157:2332", restartH:3,
-    page:"https://dayzmetrics.com/server/160473" },
-  { key:"livonia", pill:"LIVONIA", title:"HOD DayZ Heaven Livonia Survival",
-    sub:"HOD DayZ Heaven Livonia Survival \u00B7 PVE \u00B7 Livonia",
-    id:"161364", addr:"66.33.12.181:2392", restartH:0,
-    page:"https://dayzmetrics.com/server/161364" },
-  { key:"livonia-link", pill:"LIVONIA \u00B7 MAP LINK", title:"HOD Livonia \u2014 Map Link",
-    sub:"HOD Livonia \u00B7 Map Link \u00B7 Vanilla+ \u00B7 Livonia",
-    id:"349891", addr:"76.120.100.26:2332", restartH:0,
-    page:"https://dayzmetrics.com/server/349891" },
-  { key:"namalsk", pill:"NAMALSK", title:"HOD Namalsk",
-    sub:"HOD Namalsk \u00B7 Vanilla++ \u00B7 PVE \u00B7 Namalsk",
-    id:"161921", addr:"66.33.12.181:2352", restartH:0,
-    page:"https://dayzmetrics.com/server/161921" },
-  { key:"deadfall", pill:"DEADFALL", title:"HOD Deadfall Vanilla",
-    sub:"HOD Deadfall \u00B7 Vanilla \u00B7 PVE \u00B7 Deadfall",
-    id:"190263", addr:"64.253.89.166:2302", restartH:0,
-    page:"https://dayzmetrics.com/server/190263" }
+    page:"https://dayzmetrics.com/server/160090/hod-dayz-heaven-2-s7-pve-only-ai-city-helis-quests-airdrops-" }
 ];
 var cur = SERVERS[0];
 var API = "https://dayzmetrics.com/api/server/" + cur.id;
@@ -202,7 +178,6 @@ function pickServer(key, userAction){
   for(var i=0;i<btns.length;i++){ btns[i].className = (btns[i].getAttribute("data-key") === cur.key) ? "on" : ""; }
   $("sub").innerHTML = cur.sub;
   $("addr").textContent = cur.addr;
-  $("restartAt").textContent = cur.restartH ? "every 3 hours" : "schedule not published";
   $("dmLink").href = cur.page;
   document.title = "HOD Pulse \u2014 " + cur.title;
   try { localStorage.setItem("hodpulse-server", cur.key); } catch(e){}
@@ -307,18 +282,13 @@ function nextBoundary(){
 }
 
 function tick(){
-  // countdown — only when the tracker reports a restart or the cycle is known;
-  // servers with no published schedule (restartH 0) keep dashes instead of a made-up time
+  // countdown
   var target = state.nextRestart;
-  if((!target || target <= Date.now()) && cur.restartH > 0) target = nextBoundary();
-  if(target && target > Date.now()){
-    var s = Math.max(0, Math.floor((target - Date.now())/1000));
-    var hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60), ss = s%60;
-    $("countdown").textContent = (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
-    $("restartAt").textContent = "at " + new Date(target).toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
-  } else {
-    $("countdown").textContent = "\u2013:\u2013:\u2013";
-  }
+  if(!target || target <= Date.now()) target = nextBoundary();
+  var s = Math.max(0, Math.floor((target - Date.now())/1000));
+  var hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60), ss = s%60;
+  $("countdown").textContent = (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
+  $("restartAt").textContent = "at " + new Date(target).toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
   // in-game clock advanced at the server's time acceleration
   if(state.gameBase != null){
     var elapsedGameMin = (Date.now() - state.gameBaseAt)/60000 * state.accel;
