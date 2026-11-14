@@ -274,10 +274,11 @@ function render(d){
 }
 
 function nextBoundary(){
-  var now = new Date();
-  var base = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
-  var t = base + 60*1000; // these servers' restarts land ~1 min past the 3h mark
-  while(t <= Date.now()) t += cur.restartH*3600*1000;
+  // Anchor to the real restart grid: epoch-aligned UTC boundaries every restartH hours
+  // (00:00, 03:00, 06:00 ... UTC), with restarts landing ~1 min past the mark.
+  var step = cur.restartH*3600*1000;
+  var t = Math.floor(Date.now()/step)*step + 60*1000;
+  while(t <= Date.now()) t += step;
   return t;
 }
 
